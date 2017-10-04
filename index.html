@@ -1,16 +1,13 @@
 <html>
 <head>
 <title>Tournament title</title>
-<!-- These are libraries --> 
 <script src="underscore.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="breeze.debug.js"></script>
 <script src="breeze.metadata-helper.js"></script>
-
-<!-- These are from TOME -->
 <script src="utils.js"></script>
-<script src="data.js"></script>
-<script src="formats.modified.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/data.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/formats.js"></script>
 
 <meta name=viewport content="width=device-width, initial-scale=1">
 <style>
@@ -71,15 +68,13 @@ a, a:visited {
 
 </head>
 <body>
-
-<!-- More things to borrow from TOME -->
-<script src="models.pretty.js"></script>
-<script src="metadata.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/models.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/metadata.js"></script>
 
 <script type="text/javascript">
 var mgr = new breeze.EntityManager({metadataStore: metadata});
 function showLeaderboard(pk) {
-  q = new breeze.EntityQuery.from("Participants").where("tournament_pk", "!=", null);
+  q = new breeze.EntityQuery.from('Participants').where('tournament_pk', '!=', null);
   r = mgr.executeQueryLocally(q);
   sortedPlayers = _(r).chain()
                   .sortBy(function(ppt) {return -ppt.tiebreaker })
@@ -88,9 +83,9 @@ function showLeaderboard(pk) {
                   .sortBy(function(ppt) {return -ppt.total_points(); })
                   .value();
 
-  $("#player_info").hide();
-  var leaderTable = $("#leader_table");
-  var leaderTableBody = $("#leader_tbody");
+  $('#player_info').hide();
+  var leaderTable = $('#leader_table');
+  var leaderTableBody = $('#leader_tbody');
   leaderTableBody.empty();
   for (var i = 0; i < sortedPlayers.length; i++) {
     var leaderRow = $('<tr/>');
@@ -108,17 +103,15 @@ function showLeaderboard(pk) {
 };
 
 function showPlayerMatches(pk) {
-  // window.location.hash = pk;
-
-  q = new breeze.EntityQuery.from("Match")
-          .where("tournament_pk", "!=", null)
-          .where("matchparticipants", "any", "participant_pk", "==", pk)
-          .orderBy("round");
+  q = new breeze.EntityQuery.from('Match')
+          .where('tournament_pk', '!=', null)
+          .where('matchparticipants', 'any', 'participant_pk', '==', pk)
+          .orderBy('round');
   r = mgr.executeQueryLocally(q);
 
-  $("#leader_table").hide();
-  var playerInfo = $("#player_info");
-  var playerTableBody = $("#player_tbody");
+  $('#leader_table').hide();
+  var playerInfo = $('#player_info');
+  var playerTableBody = $('#player_tbody');
   playerTableBody.empty();
   for (var i = 0; i < r.length; i++) {
     var roundRow = $('<tr/>');
@@ -154,8 +147,9 @@ function showPlayerMatches(pk) {
 
 function initialize() {
   var tomeExport = Object();
-  $.get("https://example.com/path/to/tome/export.json", function(data, textStatus, jqXHR) {
+  $.get('https://example.com/path/to/tome/export.json', function(data, textStatus, jqXHR) {
       tomeExport = data;
+      tomeExport = tomeExport.split('^^THIS IS A SEPARATOR^^')[0];
       mgr.importEntities(tomeExport);
       if (window.location.hash !== '') {
         var pk = window.location.hash.substr(1);
