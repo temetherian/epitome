@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>Managing {{ shortname }} | epiTOME</title>
+<style>
+
+body {
+  font-family: 'Noto Sans', 'Arial', sans-serif;
+}
+
+input {
+  font-size: larger;
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+function initialize() {
+  var tomeExport = Object();
+  $.get('/{{ shortname }}/tome.json', function(data, textStatus, jqXHR) {
+      tomeExport = data;
+      tomeExport = tomeExport.split('^^THIS IS A SEPARATOR^^')[0];
+      $('#export').val(tomeExport);
+  });
+
+};
+
+window.onload = initialize;
+</script>
+</head>
+<form action="/{{ shortname }}/update" method="post" autocomplete="off">
+  Codeword: <input type="password" id="codeword" name="codeword" required><br />
+  <br />
+  <textarea name="export" id="export" rows=20 cols=100></textarea><br />
+  <br />
+  <input type="submit" value="Update">
+</html>

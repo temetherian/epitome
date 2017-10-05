@@ -1,18 +1,19 @@
-application: [appengine-name]
-version: 1
+application: anr-epitome
+version: beta
 runtime: python27
 api_version: 1
-threadsafe: true
+threadsafe: false
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
 
 handlers:
-- url: /
-  static_files: index.html
-  upload: index.html
-
-- url: /(.*\.html)
-  static_files: \1
-  upload: (.*\.html)
-
 - url: /(.*\.js)
   static_files: \1
   upload: (.*\.js)
+
+- url: /.*
+  script: epitome.app

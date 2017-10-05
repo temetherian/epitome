@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>epiTOME - new tournament</title>
+<meta name=viewport content="width=device-width, initial-scale=1">
+<style>
+
+body {
+  font-family: 'Noto Sans', 'Arial', sans-serif;
+}
+
+input {
+  font-size: larger;
+}
+
+#nameNotice {
+  color: red;
+  font-size: smaller;
+  font-style: italic;
+}
+</style>
+
+<script type="text/javascript">
+  existing_names = [{{ existing_names|safe }}]
+
+  function doesNameExist() {
+    var shortname = document.getElementById('shortname').value.toLowerCase();
+    var text = ' ';
+    var ret_value = true;
+    if (existing_names.includes(shortname)) {
+      text = ' this name is already in use';
+      ret_value = false;
+    }
+    document.getElementById('nameNotice').innerHTML = text;
+
+    return ret_value;
+  }
+</script>
+</head>
+<body>
+<h2>Create a new tournament</h2>
+
+<form action="/_to/create" method="post" onsubmit="return doesNameExist()" autocomplete="off">
+  <label for="tname"><h4>Tournament Title:</h4></label>
+  <input type="text" id="title" name="title" size=80 required value="{{ title }}"><br />
+  <br />
+  <label for="shortname"><h4>Page location:</h4></label>
+  anr-epitome.appspot.com/<input type="text" id="shortname" name="shortname" pattern="[A-Za-z0-9\-]{3,}" title="Letters, numbers, and hyphens (min. 3 chars)" required onChange="doesNameExist()"><span id="nameNotice"></span><br />
+  <br />
+  This must be at least 3 characters long and use only letters, numbers, and hyphens.<br />
+  <br />
+  <label for="codeword"><h4>Secret codeword:</h4></label>
+  <input type="password" id="codeword" name="codeword" required><br />
+  <br />
+  The codeword you select will be required to update the tournament.<br />
+  <em>Please note that this is not a secure password.</em><br />
+  <br />
+  <input type="submit" value="Create Tournament">
+</form>
+</body>
+</html>
