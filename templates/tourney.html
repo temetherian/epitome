@@ -1,0 +1,209 @@
+<html>
+<head>
+<title>epiTOME</title>
+<script src="/underscore.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="/breeze.debug.js"></script>
+<script src="/breeze.metadata-helper.js"></script>
+<script src="/utils.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/data.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/formats.js"></script>
+
+<meta name=viewport content="width=device-width, initial-scale=1">
+<style>
+
+body {
+  font-family: 'Noto Sans', 'Arial', sans-serif;
+}
+
+table {
+  width: 100%;
+  border: 1px;
+}
+
+tbody tr:nth-child(even) {
+  background: #DDD;
+}
+
+tr {
+  height: 3em;
+}
+
+td {
+  padding: 5px;
+  text-align: center;
+}
+
+thead {
+  background: #000;
+  color: #FFF;
+}
+
+#result {
+  width: 20%;
+}
+
+th.player_h {
+  width: 30%;
+}
+
+th.points {
+  width: 15%;
+}
+
+th.sos {
+  width: 25%;
+}
+
+a, a:visited {
+  text-decoration: none;
+  color: #0042FF;
+}
+
+#leader_table, #player_info {
+  display: none;
+}
+
+</style>
+
+</head>
+<body>
+<script src="https://www.fantasyflightgames.com/static/client/js/models.js"></script>
+<script src="https://www.fantasyflightgames.com/static/client/js/metadata.js"></script>
+
+<script type="text/javascript">
+var mgr = new breeze.EntityManager({metadataStore: metadata});
+function showLeaderboard(pk) {
+  q = new breeze.EntityQuery.from('Participants').where('tournament_pk', '!=', null);
+  r = mgr.executeQueryLocally(q);
+  sortedPlayers = _(r).chain()
+                  .sortBy(function(ppt) {return -ppt.tiebreaker })
+                  .sortBy(function(ppt) {return -ppt.ext_str_of_sched(); })
+                  .sortBy(function(ppt) {return -ppt.str_of_sched(); })
+                  .sortBy(function(ppt) {return -ppt.total_points(); })
+                  .value();
+
+  $('#player_info').hide();
+  var leaderTable = $('#leader_table');
+  var leaderTableBody = $('#leader_tbody');
+  leaderTableBody.empty();
+  for (var i = 0; i < sortedPlayers.length; i++) {
+    var leaderRow = $('<tr/>');
+    leaderRow.append(
+        $('<td/>').text(i + 1 + '.'),
+        $('<td/>').append($('<a/>').text(sortedPlayers[i].first_name + ' ' + sortedPlayers[i].last_name)
+                                   .attr('href', '#' + sortedPlayers[i].pk)),
+        $('<td/>').text(sortedPlayers[i].total_points()),
+        $('<td/>').text(sortedPlayers[i].str_of_sched().toFixed(5)),
+        $('<td/>').text(sortedPlayers[i].ext_str_of_sched().toFixed(5))
+    );
+    leaderTableBody.append(leaderRow);
+  }
+  leaderTable.show();
+};
+
+function showPlayerMatches(pk) {
+  q = new breeze.EntityQuery.from('Match')
+          .where('tournament_pk', '!=', null)
+          .where('matchparticipants', 'any', 'participant_pk', '==', pk)
+          .orderBy('round');
+  r = mgr.executeQueryLocally(q);
+
+  $('#leader_table').hide();
+  var playerInfo = $('#player_info');
+  var playerTableBody = $('#player_tbody');
+  playerTableBody.empty();
+  for (var i = 0; i < r.length; i++) {
+    var roundRow = $('<tr/>');
+    roundRow.append(
+        $('<td/>').text(r[i].round),
+        $('<td/>').text(r[i].order_index + 1),
+        $('<td/>').text(r[i].matchparticipants[0].participant.first_name + ' ' + r[i].matchparticipants[0].participant.last_name)
+    );
+    if (r[i].matchparticipants[1] === undefined) {
+      roundRow.append(
+          $('<td/>').text(r[i].matchparticipants[0].points_earned + " - 0")
+      );
+      roundRow.append(
+          $('<td/>').html('<em>Bye</em>')
+      );
+    } else {
+      if (r[i].matchparticipants[0].points_earned != null) {
+        roundRow.append(
+            $('<td/>').text(r[i].matchparticipants[0].points_earned + " - " + r[i].matchparticipants[1].points_earned)
+        );
+      } else {
+        roundRow.append($('<td/>').html('<em>tbd</em>'));
+      }
+      roundRow.append(
+          $('<td/>').text(r[i].matchparticipants[1].participant.first_name + ' ' + r[i].matchparticipants[1].participant.last_name)
+      );
+    }
+    playerTableBody.append(roundRow);
+  }
+
+  playerInfo.show();
+};
+
+function initialize() {
+  var tomeExport = Object();
+  $.get('/{{ tourney_name }}/tome.json', function(data, textStatus, jqXHR) {
+      tomeExport = data;
+      tomeExport = tomeExport.split('^^THIS IS A SEPARATOR^^')[0];
+      mgr.importEntities(tomeExport);
+      if (window.location.hash !== '') {
+        var pk = window.location.hash.substr(1);
+        showPlayerMatches(pk);
+      } else {
+        showLeaderboard();
+      }
+  });
+
+};
+
+function navigate() {
+      if (window.location.hash !== '') {
+        var pk = window.location.hash.substr(1);
+        showPlayerMatches(pk);
+      } else {
+        showLeaderboard();
+      }
+}
+
+window.onload = initialize;
+window.onhashchange = navigate;
+</script>
+
+<table id="leader_table">
+  <thead>
+    <tr>
+      <th class="rank"></th>
+      <th class="player_h">Player</th>
+      <th class="points">Points</th>
+      <th class="sos">SoS</th>
+      <th class="sos">xSoS</th>
+    </tr>
+  </thead>
+  <tbody id="leader_tbody">
+  </tbody>
+</table>
+
+<div id="player_info">
+<table id="player_table">
+<thead>
+  <tr>
+  <th id="round">#</th>
+  <th id="table">Table</th>
+  <th class="player_h">Player 1</th>
+  <th id="result">Result</th>
+  <th class="player_h">Player 2</th>
+  </tr>
+</thead>
+<tbody id="player_tbody">
+</tbody>
+</table>
+<a href="#" onclick="showLeaderboard();">Show Leaderboard</a>
+</div>
+
+</body>
+</html>

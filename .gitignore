@@ -1,0 +1,5 @@
+# local stuff
+testdata/
+
+# python generated files
+*.pyc
