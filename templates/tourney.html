@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>epiTOME</title>
+<title>{{ title }} | epiTOME</title>
 <script src="/underscore.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="/breeze.debug.js"></script>
@@ -147,7 +147,7 @@ function showPlayerMatches(pk) {
 
 function initialize() {
   var tomeExport = Object();
-  $.get('/{{ tourney_name }}/tome.json', function(data, textStatus, jqXHR) {
+  $.get('/{{ shortname }}/tome.json', function(data, textStatus, jqXHR) {
       tomeExport = data;
       tomeExport = tomeExport.split('^^THIS IS A SEPARATOR^^')[0];
       mgr.importEntities(tomeExport);

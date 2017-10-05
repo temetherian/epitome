@@ -9,8 +9,7 @@ body {
 }
 
 input {
-  margin-right: 5px;
-  margin-top: 5px;
+  font-size: larger;
 }
 
 #nameNotice {
@@ -24,11 +23,11 @@ input {
   existing_names = [{{ existing_names|safe }}]
 
   function doesNameExist() {
-    var tname = document.getElementById('tname').value.toLowerCase();
-    var text = '';
+    var shortname = document.getElementById('shortname').value.toLowerCase();
+    var text = ' ';
     var ret_value = true;
-    if (existing_names.includes(tname)) {
-      text = 'this name is already in use';
+    if (existing_names.includes(shortname)) {
+      text = ' this name is already in use';
       ret_value = false;
     }
     document.getElementById('nameNotice').innerHTML = text;
@@ -40,13 +39,16 @@ input {
 <body>
 <h2>Create a new tournament</h2>
 
-<form action="/create" method="post" onsubmit="return doesNameExist()">
-  <label for="tname">Tournament Name:</label><br />
-  <input type="text" id="tname" name="tname" pattern="[A-Za-z0-9\-]{3,}" title="Letters, numbers, and hyphens (min. 3 chars)" required onChange="doesNameExist()"><span id="nameNotice"></span><br />
+<form action="/_to/create" method="post" onsubmit="return doesNameExist()" autocomplete="off">
+  <label for="tname"><h4>Tournament Title:</h4></label>
+  <input type="text" id="title" name="title" size=80 required value="{{ title }}"><br />
   <br />
-  Your tournament name must be at least 3 characters long and use only letters, numbers, and hyphens.<br />
+  <label for="shortname"><h4>Page location:</h4></label>
+  anr-epitome.appspot.com/<input type="text" id="shortname" name="shortname" pattern="[A-Za-z0-9\-]{3,}" title="Letters, numbers, and hyphens (min. 3 chars)" required onChange="doesNameExist()"><span id="nameNotice"></span><br />
   <br />
-  <label for="codeword">Secret codeword:</label><br />
+  This must be at least 3 characters long and use only letters, numbers, and hyphens.<br />
+  <br />
+  <label for="codeword"><h4>Secret codeword:</h4></label>
   <input type="password" id="codeword" name="codeword" required><br />
   <br />
   The codeword you select will be required to update the tournament.<br />
