@@ -17,6 +17,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class Tournament(ndb.Model):
   title = ndb.StringProperty()
   codeword = ndb.StringProperty()
+  app = ndb.StringProperty(default='tome')
 
 
 ################
@@ -53,7 +54,7 @@ class CreateTournamentHandler(webapp2.RequestHandler):
       new_tournament.put()
       self.redirect('/%s/manage' % shortname)
 
-class ServeTomeHandler(webapp2.RequestHandler):
+class ServeJsonHandler(webapp2.RequestHandler):
   def get(self, shortname):
     shortname = shortname.lower()
     bucket_name = os.environ.get('BUCKET_NAME',
@@ -109,14 +110,18 @@ class TournamentPage(webapp2.RequestHandler):
       self.response.write('Tournament not found.')
       return
     template_values = {'shortname': shortname, 'title': tourney.title}
-    template = JINJA_ENVIRONMENT.get_template('templates/tourney.html')
+    if tourney.app == 'nrtm':
+      template = JINJA_ENVIRONMENT.get_template('templates/nrtm.html')
+    else:
+      template = JINJA_ENVIRONMENT.get_template('templates/tome.html')
     self.response.write(template.render(template_values))
 
 ROUTES = [
   ('/', FrontPage),
   ('/_to/new', NewTournamentPage),
   ('/_to/create', CreateTournamentHandler),
-  ('/([A-Za-z0-9\-]+)/tome.json', ServeTomeHandler),
+  ('/([A-Za-z0-9\-]+)/tome.json', ServeJsonHandler),
+  ('/([A-Za-z0-9\-]+)/nrtm.json', ServeJsonHandler),
   ('/([A-Za-z0-9\-]+)/manage', ManageTournamentPage),
   ('/([A-Za-z0-9\-]+)/update', UpdateHandler),
   ('/([A-Za-z0-9\-]+)[/]?', TournamentPage),
