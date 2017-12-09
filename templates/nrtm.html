@@ -1,0 +1,237 @@
+<html>
+<head>
+<title>{{ title }} | epiTOME</title>
+<script src="/js/underscore.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<meta name=viewport content="width=device-width, initial-scale=1">
+<style>
+
+body {
+  font-family: 'Noto Sans', 'Arial', sans-serif;
+}
+
+table {
+  width: 100%;
+  border: 1px;
+}
+
+tbody tr:nth-child(even) {
+  background: #DDD;
+}
+
+tr {
+  height: 3em;
+}
+
+td {
+  padding: 5px;
+  text-align: center;
+}
+
+thead {
+  background: #000;
+  color: #FFF;
+}
+
+#result {
+  width: 20%;
+}
+
+th.player_h {
+  width: 30%;
+}
+
+th.points {
+  width: 15%;
+}
+
+th.sos {
+  width: 25%;
+}
+
+a, a:visited {
+  text-decoration: none;
+  color: #0042FF;
+}
+
+#leader_table, #player_info {
+  display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<script type="text/javascript">
+nrtm = Object();
+playerNames = Object();
+
+function showLeaderboard() {
+  sortedPlayers = _(nrtm.players).sortBy(function(ppt) {return ppt.rank });
+
+  $('#player_info').hide();
+  var leaderTable = $('#leader_table');
+  var leaderTableBody = $('#leader_tbody');
+  leaderTableBody.empty();
+  for (var i = 0; i < sortedPlayers.length; i++) {
+    var leaderRow = $('<tr/>');
+    leaderRow.append(
+        $('<td/>').text(i + 1 + '.'),
+        $('<td/>').append($('<a/>').text(sortedPlayers[i].name)
+                                   .attr('href', '#' + sortedPlayers[i].id)),
+        $('<td/>').text(sortedPlayers[i].matchPoints),
+        $('<td/>').text(sortedPlayers[i].strengthOfSchedule.toFixed(5)),
+        $('<td/>').text(sortedPlayers[i].extendedStrengthOfSchedule.toFixed(5))
+    );
+    leaderTableBody.append(leaderRow);
+  }
+  leaderTable.show();
+};
+
+function showPlayerMatches(id) {
+  var myName = playerNames[id];
+  $('#leader_table').hide();
+  var playerInfo = $('#player_info');
+  var playerTableBody = $('#player_tbody');
+  playerTableBody.empty();
+  for (var i = 0; i < nrtm.rounds.length; i++) {
+    var round = i + 1;
+    var me = null;
+    var opp = null;
+    var myPrestige = null;
+    var oppPrestige = null;
+    var oppName = null;
+    var table = 0;
+    for (var j = 0; j < nrtm.rounds[i].length; j++) {
+      var thisMatch = nrtm.rounds[i][j];
+      if (thisMatch.player1.id == id) {
+        me = thisMatch.player1;
+        opp = thisMatch.player2;
+      } else if (thisMatch.player2.id == id) {
+        opp = thisMatch.player1;
+        me = thisMatch.player2;
+      }
+      if (me !== null) {
+        table = thisMatch.table;
+        oppName = playerNames[opp.id];
+        if (thisMatch.eliminationGame) {
+          round = '-'
+          if (me.role == 'runner') {
+            myPrestige = 'R';
+            oppPrestige = 'C';
+          } else {
+            myPrestige = 'C';
+            oppPrestige = 'R';
+          }
+          if (me.winner) {
+            myPrestige = '<strong>' + myPrestige + '</strong>';
+          }
+          if (opp.winner) {
+            oppPrestige = '<strong>' + oppPrestige + '</strong>';
+          }
+        } else {
+          myPrestige = me.runnerScore + me.corpScore;
+          oppPrestige = opp.runnerScore + opp.corpScore;
+        }
+
+      }
+    }
+    if (myPrestige === null) {
+      continue;
+    }
+    var roundRow = $('<tr/>');
+    roundRow.append(
+        $('<td/>').text(round),
+        $('<td/>').text(table),
+        $('<td/>').text(myName)
+    );
+    if (oppName === null) {
+      roundRow.append(
+          $('<td/>').text(myPrestige + " - 0")
+      );
+      roundRow.append(
+          $('<td/>').html('<em>Bye</em>')
+      );
+    } else {
+      if (myPrestige + oppPrestige != 0) {
+        roundRow.append(
+            $('<td/>').html(myPrestige + " - " + oppPrestige)
+        );
+      } else {
+        roundRow.append($('<td/>').html('<em>tbd</em>'));
+      }
+      roundRow.append(
+          $('<td/>').text(oppName)
+      );
+    }
+    playerTableBody.append(roundRow);
+  }
+
+  playerInfo.show();
+};
+
+function initialize() {
+  $.getJSON('/{{ shortname }}/nrtm.json', function(data, textStatus, jqXHR) {
+      nrtm = data;
+      playerNames = {0: null};
+      for (var i = 0; i < nrtm.players.length; i++) {
+        playerNames[nrtm.players[i].id] = nrtm.players[i].name;
+      }
+
+      if (window.location.hash !== '') {
+        var id = window.location.hash.substr(1);
+        showPlayerMatches(id);
+      } else {
+        showLeaderboard();
+      }
+  });
+};
+
+function navigate() {
+      if (window.location.hash !== '') {
+        var id = window.location.hash.substr(1);
+        showPlayerMatches(id);
+      } else {
+        showLeaderboard();
+      }
+}
+
+window.onload = initialize;
+window.onhashchange = navigate;
+</script>
+
+<table id="leader_table">
+  <thead>
+    <tr>
+      <th class="rank"></th>
+      <th class="player_h">Player</th>
+      <th class="points">Points</th>
+      <th class="sos">SoS</th>
+      <th class="sos">xSoS</th>
+    </tr>
+  </thead>
+  <tbody id="leader_tbody">
+  </tbody>
+</table>
+
+<div id="player_info">
+<table id="player_table">
+<thead>
+  <tr>
+  <th id="round">#</th>
+  <th id="table">Table</th>
+  <th class="player_h">Player 1</th>
+  <th id="result">Result</th>
+  <th class="player_h">Player 2</th>
+  </tr>
+</thead>
+<tbody id="player_tbody">
+</tbody>
+</table>
+<a href="#" onclick="showLeaderboard();">Show Leaderboard</a>
+</div>
+
+</body>
+</html>
