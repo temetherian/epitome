@@ -2,13 +2,36 @@
 <head>
 <title>epiTOME</title>
 <meta name=viewport content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <style>
 
 body {
   font-family: 'Noto Sans', 'Arial', sans-serif;
 }
+
+#shortname {
+  font-size: larger;
+}
+
+#shortlink {
+  display: inline-block;
+  padding: 3px 5px 3px 5px;
+  background: #0099EE;
+  color: #FFFFFF;
+  text-decoration: none;
+}
 </style>
 
+<script type="text/javascript">
+$(function() {
+  dest = './' + $('#shortname').val();
+  $('#shortlink').attr('href', dest);
+  $('#shortname').change(function() {
+      dest = './' + $('#shortname').val();
+      $('#shortlink').attr('href', dest);
+  });
+});
+</script>
 </head>
 <body>
 <h2>epiTOME</h2>
@@ -16,6 +39,9 @@ a player interface for TOME
 <br />
 <br />
 <br />
-<a href="/norcal2017/">NorCal Regionals 2017</a>
+Tournament:
+<br />
+<input type="text" id="shortname" />
+<a id="shortlink" href="./">go</a>
 </body>
 </html>
