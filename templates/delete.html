@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>Delete {{ shortname }}? | epiTOME</title>
+<style>
+body {
+  font-family: 'Noto Sans', 'Arial', sans-serif;
+}
+
+input {
+  font-size: larger;
+}
+</style>
+</head>
+<body>
+Are you sure you want to delete <strong>{{ shortname }}</strong>?<br>
+This cannot be undone.<br>
+<br>
+<form action="/{{ shortname }}/delete" method="post" autocomplete="off">
+  Codeword: <input type="password" id="codeword" name="codeword" required><br>
+  <br>
+  <input type="submit" value="Delete">
+</form>
+</body>
+</html>

@@ -39,6 +39,9 @@ input {
 <body>
 <h2>Create a new tournament</h2>
 
+Create a tournament here if you are using TOME to run the tournament.<br>
+(If you are using NRTM, the app will manage things for you.)<br>
+
 <form action="/_to/create" method="post" onsubmit="return doesNameExist()" autocomplete="off">
   <label for="tname"><h4>Tournament Title:</h4></label>
   <input type="text" id="title" name="title" size=80 required value="{{ title }}"><br />
