@@ -15,5 +15,9 @@ handlers:
   static_files: \1
   upload: (.*\.js)
 
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+
 - url: /.*
   script: epitome.app
