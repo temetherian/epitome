@@ -52,6 +52,13 @@ Tournament:
 <input type="text" id="shortname">
 <a id="shortlink" href="./">go</a>
 <br>
+<br>
+<br>
+<div id="recent">
+{% for short, title in tourneys %}
+<a href="{{short}}">{{ title }}</a><br>
+{% endfor %}
+</div>
 <a id="new" href="./_to/">TO information</a>
 </body>
 </html>
