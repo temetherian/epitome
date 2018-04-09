@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import cloudstorage as gcs
+import datetime
 import jinja2
 import json
 import os
@@ -20,6 +21,7 @@ class Tournament(ndb.Model):
   title = ndb.StringProperty()
   codeword = ndb.StringProperty()
   app = ndb.StringProperty(default='tome')
+  date = ndb.DateProperty(auto_now=True)
 
 ################
 # API Handlers #
@@ -106,6 +108,7 @@ class ApiUpdate(webapp2.RequestHandler):
       data = self.request.get('export')
       with gcs.open(filename, 'w', content_type='text/plain') as export_data:
         export_data.write(data.encode('utf-8'))
+      tourney.put() # just touch it to update the date field
       r['success'] = True
 
     self.response.write(json.dumps(r))
@@ -117,7 +120,10 @@ class ApiUpdate(webapp2.RequestHandler):
 class FrontPage(webapp2.RequestHandler):
   def get(self):
     template = JINJA_ENVIRONMENT.get_template('templates/index.html')
-    self.response.write(template.render())
+    yesterday = datetime.date.today() - datetime.timedelta(1)
+    tourneys = Tournament.query(Tournament.date >= yesterday).order(Tournament.date, Tournament.title)
+    current_tournaments = [(t.key.id(), t.title) for t in tourneys]
+    self.response.write(template.render({'tourneys': current_tournaments}))
 
 class InfoPage(webapp2.RequestHandler):
   def get(self):
@@ -205,6 +211,8 @@ class UpdateHandler(webapp2.RequestHandler):
     data = self.request.get('export')
     with gcs.open(filename, 'w', content_type='text/plain') as export_data:
       export_data.write(data.encode('utf-8'))
+
+    tourney.put() # just touch it to update the date field
 
     self.redirect('/%s/manage' % shortname)
 
