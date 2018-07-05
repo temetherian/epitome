@@ -118,7 +118,10 @@ function showPlayerMatches(id) {
         oppName = playerNames[opp.id];
         if (thisMatch.eliminationGame) {
           round = '-'
-          if (me.role == 'runner') {
+          if (me.role == '?') {
+            myPrestige = '?';
+            oppPrestige = '?';
+          } else if (me.role == 'runner') {
             myPrestige = 'R';
             oppPrestige = 'C';
           } else {
