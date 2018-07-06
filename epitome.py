@@ -108,6 +108,13 @@ class ApiUpdate(webapp2.RequestHandler):
       data = self.request.get('export')
       with gcs.open(filename, 'w', content_type='text/plain') as export_data:
         export_data.write(data.encode('utf-8'))
+      if tourney.app == 'nrtm':
+        try:
+          parsed = json.loads(data)
+          tourney.title = parsed['name']
+        except Exception as e:
+          # Broad handling, since I need to check it against actual NRTM behaviour.
+          print e
       tourney.put() # just touch it to update the date field
       r['success'] = True
 

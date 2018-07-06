@@ -19,5 +19,9 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
+- url: /favicon.ico
+  static_files: favicon.ico
+  upload: favicon.ico
+
 - url: /.*
   script: epitome.app
